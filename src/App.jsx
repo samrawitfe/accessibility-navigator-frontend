@@ -6,8 +6,9 @@ function App() {
   return (
     <Router>
       <Header />
-      <Routes>
+      <Routes style={{ top: "50px" }}>
         <Route path="/" element={<Home />} />
+        {/* <Route path="/account" element={<Account />} /> */}
       </Routes>
     </Router>
   );
