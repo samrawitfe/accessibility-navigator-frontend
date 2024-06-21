@@ -52,7 +52,7 @@ const VoiceSearch = ({ onSpeechRecognition }) => {
     >
       <MdMic
         style={{
-          fontSize: 32,
+          fontSize: 40,
           color: "#fff",
         }}
       />
