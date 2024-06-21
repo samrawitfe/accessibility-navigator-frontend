@@ -1,36 +1,34 @@
 import React from "react";
 import { TextField, Button, Grid } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+
 const Search = ({ searchText, handleSearchChange, handleSearch, children }) => {
   return (
-    <Grid item xs={12} marginBottom={4}>
-      <div>
-        <div style={{ display: "flex", alignItems: "center" }}>
+    <Grid item xs={12}>
+      <Grid container direction="column" spacing={2} alignItems="end">
+        <Grid item xs={12} style={{ width: "100%" }}>
           <TextField
             label="Search for Places"
             value={searchText}
             onChange={handleSearchChange}
             fullWidth
-            variant="filled"
+            variant="outlined"
             InputProps={{
-              style: {
-                backgroundColor: "#555",
-                color: "#fff",
-                marginBottom: "10px",
-              },
+              endAdornment: children,
             }}
-            InputLabelProps={{ style: { color: "#aaa" } }}
           />
-          {children}
-        </div>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSearch}
-          style={{ marginRight: "10px" }}
-        >
-          Search
-        </Button>
-      </div>
+        </Grid>
+        <Grid item>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSearch}
+            startIcon={<SearchIcon />}
+          >
+            Search
+          </Button>
+        </Grid>
+      </Grid>
     </Grid>
   );
 };

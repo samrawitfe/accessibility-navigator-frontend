@@ -1,3 +1,4 @@
+// Home.jsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -8,17 +9,17 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import Search from "./search";
 import VoiceSearch from "./voice-search";
-import { useLanguage } from "../language-context";
 import PlaceCard from "./place-card";
 
 const Home = () => {
   const [places, setPlaces] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [label, setLabel] = useState("Recent Places");
-  const [loading, setLoading] = useState(false); // State to manage loading state
-  const { language } = useLanguage();
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchRecentPlaces();
@@ -28,9 +29,8 @@ const Home = () => {
     const demoData = [
       {
         id: 90,
-        name: "obchodní dům Centrum",
-        name_en: "Supermarket Centrum",
-        type: "obchod",
+        name: "Knihovna Jiřího Mahena v Brně",
+        type: "Knihovna",
         accessibility: "přístupné",
         address: "Kobližná 24",
         coordinates: [16.6123939938643, 49.1952034305194],
@@ -79,6 +79,7 @@ const Home = () => {
       console.log(searchResults);
 
       const transformedResults = searchResults.data.map((result) => ({
+        id: result.id,
         name: result.name,
         address: result.address,
         coordinates: result.coordinates,
@@ -87,7 +88,7 @@ const Home = () => {
         website: result.website,
         accessibility: result.accessibility,
       }));
-
+      console.log(transformedResults);
       setPlaces(transformedResults);
       setLabel(`Search Results for "${query}"`);
     } catch (error) {
@@ -106,32 +107,32 @@ const Home = () => {
     handleSearch(transcript);
   };
 
+  const handlePlaceSelect = (place) => {
+    navigate(`/place/${place.id}`);
+  };
+
   return (
-    <Container maxWidth="md" sx={{ my: 4 }}>
-      <Paper
-        elevation={3}
-        sx={{ p: 3, borderRadius: 2, backgroundColor: "background.paper" }}
-      >
+    <Container maxWidth="lg">
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2, my: 4 }}>
         <Typography
           variant="h3"
           gutterBottom
           sx={{
             color: "primary.main",
-            fontSize: "2.5rem",
             fontWeight: "bold",
             textAlign: "center",
-            marginBottom: "30px",
+            mb: 4,
           }}
         >
           Accessibility Navigator
         </Typography>
-        <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
+        <Grid container spacing={3} alignItems="center" sx={{ mb: 4 }}>
           <Search
             searchText={searchText}
             handleSearchChange={handleSearchChange}
             handleSearch={() => handleSearch(searchText)}
           >
-            <VoiceSearch onSpeechRecognition={handleVoiceSearch} />{" "}
+            <VoiceSearch onSpeechRecognition={handleVoiceSearch} />
           </Search>
         </Grid>
         <Typography
@@ -139,28 +140,33 @@ const Home = () => {
           gutterBottom
           sx={{
             color: "secondary.main",
-            fontSize: "1.5rem",
-            marginBottom: "20px",
+            fontWeight: "medium",
+            mb: 3,
           }}
         >
           {label}
         </Typography>
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
             <CircularProgress color="primary" />
           </Box>
         ) : (
           <>
             {places.length === 0 && (
-              <Typography variant="body1" sx={{ color: "text.secondary" }}>
+              <Typography
+                variant="body1"
+                sx={{ color: "text.secondary", mb: 2 }}
+              >
                 No results found for "{searchText}"
               </Typography>
             )}
             <List>
               {places.map((place, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <PlaceCard place={place} />
-                </Box>
+                <PlaceCard
+                  key={place.id}
+                  place={place}
+                  onSelect={() => handlePlaceSelect(place)}
+                />
               ))}
             </List>
           </>
