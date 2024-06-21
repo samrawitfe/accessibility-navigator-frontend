@@ -13,6 +13,7 @@ import {
   ImageListItem,
   Divider,
 } from "@mui/material";
+import { CoPresentOutlined } from "@mui/icons-material";
 
 const DetailBox = ({ label, value }) => (
   <Box
@@ -37,54 +38,59 @@ const PlaceDetails = () => {
   const navigate = useNavigate();
   const [place, setPlace] = useState(null);
 
+  // useEffect(() => {
+  //   // Fetch place details using the id
+  //   // For now, we'll use dummy data
+
+  //   const fetchedPlace = {
+  //     id: 90,
+  //     name: "obchodní dům Centrum",
+  //     name_en: "Supermarket Centrum",
+  //     type: "obchod",
+  //     accessibility: "přístupné",
+  //     address: "Kobližná 24",
+  //     coordinates: [16.6123939938643, 49.1952034305194],
+  //     description:
+  //       "Barrier-free access from Kobližná and Jánská streets, photocell doors, 2 lifts to all floors (door 80, width 160, depth 140 cm).; Services: clothes, real estate agency, massage….",
+  //     website: "www.example.com",
+  //     phone: "542 123 710",
+  //     reviews: [
+  //       {
+  //         user: "Elena",
+  //         comment: "it's accessible",
+  //         images: ["https://www.archiweb.cz/Image/zpravy/2015/03/vankovka.jpg"],
+  //       },
+  //       {
+  //         user: "Jane",
+  //         comment: "Great place, very convenient",
+  //         images: [
+  //           "https://via.placeholder.com/150",
+  //           "https://via.placeholder.com/150",
+  //         ],
+  //       },
+  //     ],
+  //   };
+  //   setPlace(fetchedPlace);
+  // }, [id]);
+
   useEffect(() => {
-    // Fetch place details using the id
-    // For now, we'll use dummy data
+    const fetchPlaceDetails = async () => {
+      try {
+        const response = await fetch(`/api/places/${id}`);
+        const result = await response.json();
 
-    const fetchedPlace = {
-      id: 90,
-      name: "obchodní dům Centrum",
-      name_en: "Supermarket Centrum",
-      type: "obchod",
-      accessibility: "přístupné",
-      address: "Kobližná 24",
-      coordinates: [16.6123939938643, 49.1952034305194],
-      description:
-        "Barrier-free access from Kobližná and Jánská streets, photocell doors, 2 lifts to all floors (door 80, width 160, depth 140 cm).; Services: clothes, real estate agency, massage….",
-      website: "www.example.com",
-      phone: "542 123 710",
-      reviews: [
-        {
-          user: "sam",
-          comment: "it's accessible",
-          images: ["https://via.placeholder.com/150"],
-        },
-        {
-          user: "jane",
-          comment: "Great place, very convenient",
-          images: [
-            "https://via.placeholder.com/150",
-            "https://via.placeholder.com/150",
-          ],
-        },
-      ],
+        if (result.success) {
+          setPlace(result.data);
+        } else {
+          console.error("Error fetching place details:", result.message);
+        }
+      } catch (error) {
+        console.error("Error fetching place details:", error);
+      }
     };
-    setPlace(fetchedPlace);
+
+    fetchPlaceDetails();
   }, [id]);
-
-  //   useEffect(() => {
-  //     const fetchPlaceDetails = async () => {
-  //       try {
-  //         const response = await fetch(`/api/places/${id}`);
-  //         const data = await response.json();
-  //         setPlace(data);
-  //       } catch (error) {
-  //         console.error("Error fetching place details:", error);
-  //       }
-  //     };
-
-  //     fetchPlaceDetails();
-  //   }, [id]);
 
   const handleStartNavigation = () => {
     console.log(place.coordinates);
@@ -100,14 +106,20 @@ const PlaceDetails = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Ensure you have the token available
         },
         body: JSON.stringify(newReview),
       });
-      const data = await response.json();
-      setPlace((prevPlace) => ({
-        ...prevPlace,
-        reviews: [...prevPlace.reviews, data],
-      }));
+      const result = await response.json();
+
+      if (result.success) {
+        setPlace((prevPlace) => ({
+          ...prevPlace,
+          reviews: [...prevPlace.reviews, result.data],
+        }));
+      } else {
+        console.error("Error adding review:", result.message);
+      }
     } catch (error) {
       console.error("Error adding review:", error);
     }
@@ -116,6 +128,8 @@ const PlaceDetails = () => {
   if (!place) {
     return <Typography>Loading...</Typography>;
   }
+
+  const { place: placeDetails, reviews } = place;
 
   return (
     <Container maxWidth="lg">
@@ -132,7 +146,7 @@ const PlaceDetails = () => {
             variant="h4"
             sx={{ color: "primary.main", fontWeight: "bold" }}
           >
-            {place.name}
+            {placeDetails.name}
           </Typography>
           <Box>
             <Button
@@ -153,7 +167,7 @@ const PlaceDetails = () => {
           gutterBottom
           sx={{ color: "secondary.main", mb: 3 }}
         >
-          {place.name_en}
+          {placeDetails.name_en}
         </Typography>
 
         <Box sx={{ bgcolor: "background.paper", p: 3, borderRadius: 2, mb: 4 }}>
@@ -162,25 +176,28 @@ const PlaceDetails = () => {
           </Typography>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
-              <DetailBox label="Address" value={place.address} />
-              <DetailBox label="Type" value={place.type} />
+              <DetailBox label="Address" value={placeDetails.address} />
+              <DetailBox label="Type" value={placeDetails.type} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <DetailBox label="Phone" value={place.phone} />
-              <DetailBox label="Accessibility" value={place.accessibility} />
+              <DetailBox label="Phone" value={placeDetails.phone} />
+              <DetailBox
+                label="Accessibility"
+                value={placeDetails.accessibility}
+              />
             </Grid>
-            {place.website && (
+            {placeDetails.website && (
               <Grid item xs={12}>
                 <DetailBox
                   label="Website"
                   value={
                     <a
-                      href={place.website}
+                      href={placeDetails.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: "#90CAF9" }}
                     >
-                      {place.website}
+                      {placeDetails.website}
                     </a>
                   }
                 />
@@ -193,7 +210,7 @@ const PlaceDetails = () => {
           <Typography variant="h6" gutterBottom sx={{ color: "primary.main" }}>
             Description
           </Typography>
-          <Typography variant="body1">{place.description}</Typography>
+          <Typography variant="body1">{placeDetails.description}</Typography>
         </Box>
 
         <Divider sx={{ my: 4 }} />
@@ -207,25 +224,31 @@ const PlaceDetails = () => {
         </Typography>
         <AddReview onAddReview={handleAddReview} />
         <Grid container spacing={3}>
-          {place.reviews.map((review, index) => (
+          {reviews.map((review, index) => (
             <Grid item xs={12} key={index}>
               <Paper elevation={2} sx={{ p: 3, bgcolor: "background.paper" }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                   <Avatar sx={{ mr: 2, bgcolor: "secondary.main" }}>
-                    {review.user[0].toUpperCase()}
+                    {review.user && review.user.username
+                      ? review.user.username[0].toUpperCase()
+                      : "U"}
                   </Avatar>
-                  <Typography variant="h6">{review.user}</Typography>
+                  <Typography variant="h6">
+                    {review.user && review.user.username
+                      ? review.user.username
+                      : "Unknown User"}
+                  </Typography>
                 </Box>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  {review.comment}
+                  {review.text}
                 </Typography>
-                {review.images.length > 0 && (
+                {review.imageUrl && review.imageUrl.length > 0 && (
                   <ImageList
                     sx={{ width: "100%", height: "auto" }}
                     cols={3}
                     rowHeight={164}
                   >
-                    {review.images.map((img, imgIndex) => (
+                    {review.imageUrl.map((img, imgIndex) => (
                       <ImageListItem key={imgIndex}>
                         <img
                           src={img}
