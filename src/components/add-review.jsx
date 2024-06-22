@@ -1,3 +1,4 @@
+// src/components/AddReview.js
 import React, { useState } from "react";
 import {
   Box,
@@ -9,7 +10,7 @@ import {
 } from "@mui/material";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 
-const AddReview = ({ onAddReview }) => {
+const AddReview = ({ onAddReview, user }) => {
   const [reviewText, setReviewText] = useState("");
   const [image, setImage] = useState(null);
 
@@ -19,16 +20,25 @@ const AddReview = ({ onAddReview }) => {
 
   const handleImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
-      setImage(URL.createObjectURL(event.target.files[0]));
+      setImage(event.target.files[0]);
     }
   };
 
   const handleSubmit = () => {
-    onAddReview({
-      user: "Current User", // This should be replaced with actual user data
-      comment: reviewText,
-      images: image ? [image] : [],
-    });
+    if (!reviewText.trim()) {
+      alert("Review text cannot be empty");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("text", reviewText);
+    formData.append("userId", user._id); // Ensure user ID is passed correctly
+    formData.append("username", user.username);
+    if (image) {
+      formData.append("image", image);
+    }
+
+    onAddReview(formData);
     setReviewText("");
     setImage(null);
   };
@@ -72,7 +82,7 @@ const AddReview = ({ onAddReview }) => {
       {image && (
         <Box sx={{ mb: 2 }}>
           <img
-            src={image}
+            src={URL.createObjectURL(image)}
             alt="Preview"
             style={{ maxWidth: "100%", maxHeight: "200px" }}
           />
