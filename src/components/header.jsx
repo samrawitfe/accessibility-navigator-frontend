@@ -1,9 +1,17 @@
 // src/components/Header.js
 import React from "react";
 import { AppBar, Toolbar, Typography, Button } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-const Header = () => {
+const Header = ({ user, setUser }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
   return (
     <AppBar position="static" style={{ backgroundColor: "#444" }}>
       <Toolbar>
@@ -13,10 +21,20 @@ const Header = () => {
         <Button color="inherit" component={Link} to="/">
           Home
         </Button>
-
-        <Button color="inherit" component={Link} to="/account">
-          Account
-        </Button>
+        {user ? (
+          <>
+            <Button color="inherit" component={Link} to="/account">
+              Account
+            </Button>
+            <Button color="inherit" onClick={handleLogout}>
+              Logout
+            </Button>
+          </>
+        ) : (
+          <Button color="inherit" component={Link} to="/login">
+            Login
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   );

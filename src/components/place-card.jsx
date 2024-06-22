@@ -56,6 +56,7 @@ const PlaceCard = ({ place, onSelect }) => {
             <Box component="div">
               <Typography
                 variant="body1"
+                component="div"
                 sx={{
                   color: "text.primary",
                   fontSize: "1.1rem",
@@ -67,6 +68,7 @@ const PlaceCard = ({ place, onSelect }) => {
               {place.description && (
                 <Typography
                   variant="body2"
+                  component="div"
                   sx={{
                     color: "text.secondary",
                     mb: 2,
